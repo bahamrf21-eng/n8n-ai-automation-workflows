@@ -1,0 +1,172 @@
+{
+  "name": "ai agent restreunet",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Feed back section",
+        "formDescription": "share with us your experience ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Enter your name ex: ahmed ",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Feed back ",
+              "placeholder": "Enter your review ",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dc5744d5-a44f-492b-b4c1-4815844e114d",
+      "name": "On form submission",
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=this is the customer review :{{ $json['Feed back '] }}\nYou are a sentiment analysis expert. I will provide a customer review—your task is to classify its overall sentiment as exactly one of the following: Positive, Negative, or Neutral. Respond with only the label. No explanations or additional text."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        208,
+        0
+      ],
+      "id": "89e86e18-f73b-4a1f-a4cd-488a23d95601",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_PRIVATE_RESOURCE_ID",
+          "mode": "list",
+          "cachedResultName": "review",
+          "cachedResultUrl": "YOUR_PRIVATE_RESOURCE_URL"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "YOUR_PRIVATE_RESOURCE_URL"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name ": "={{ $('On form submission').item.json.Name }}",
+            "review": "={{ $json.message.content.sentiment }}"
+          },
+          "matchingColumns": [
+            "name "
+          ],
+          "schema": [
+            {
+              "id": "name ",
+              "displayName": "name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "review",
+              "displayName": "review",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        480,
+        96
+      ],
+      "id": "cf09b830-269b-4c70-b194-5b54f2d1fa94",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c2b92580-035f-497a-9ab8-0f4034e039be",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "id": "JJn1akqGve0O5LU6",
+  "tags": []
+}

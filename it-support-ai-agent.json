@@ -1,0 +1,138 @@
+{
+  "name": "the first ai agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "YOUR_PRIVATE_RESOURCE_ID",
+          "mode": "url"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "YOUR_PRIVATE_RESOURCE_ID",
+          "mode": "url"
+        },
+        "triggerField": "Ticket ID",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4fc7dde7-7b10-4ed0-8982-c8af9290c4af",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are the IT Support Team’s coordinator. Your task is to gather information from new support tickets and write a brief summary email for IT management. The email should be signed as “IT Support Team.”\n\nHere are the support ticket details:\n- Ticket ID:{{ $json.fields['Ticket ID'] }}\n- User:{{ $json.fields.User }}\n- Issue:{{ $json.fields.Issue }}\n- Priority:{{ $json.fields.Priority }}\n- Date Submitted:{{ $json.fields['Date Submitted'] }}\n\n\nPlease provide the following output:\n- Email_subject:\n- Email_content:\n\nEnsure the content is clean, well-structured, and uses bullet points.\n"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7e2f2f7d-fd07-46dc-b8e3-f1957e037734",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@example.com",
+        "subject": "={{ $json.message.content.Email_subject }}",
+        "emailType": "text",
+        "message": "={{ $json.message.content.Email_content }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "7fb4b148-5bb5-4c00-8a1b-f85ff586cdda",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Airtable Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e70bab11-6bb7-45c9-9fc4-02b5f698a5e5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "id": "fNUy0lJB7GDpfAZn",
+  "tags": []
+}
